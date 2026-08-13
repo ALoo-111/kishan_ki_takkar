@@ -62,3 +62,14 @@ The app is ready for native-device testing through the Expo preview. The current
 ## Reference
 
 The game requirements and asset prompts in this document are based on the supplied `pasted_content.txt` brief.
+
+## Visual Upgrade Addendum
+
+The latest visual pass preserves the original gameplay loop and replaces the flattest presentation layers with dimensional materials and generated artwork. The menu and game scene now use generated 3D-style Kishan and Banaras-inspired Holi village artwork, with metallic gold button depth, raised borders, HUD glow, an emissive-style power tube, stronger shadows, and richer particle overlays. The source assets are referenced through the managed asset URLs below so the generated media remains available without inflating the mobile bundle.
+
+| Asset | Managed URL | Use |
+|---|---|---|
+| 3D-style Kishan hero | `/manus-storage/kishan-hero-3d_f8df3b11.png` | Main menu, active runner, skin preview |
+| Holi village environment | `/manus-storage/holi-village-3d_6c35b0b2.png` | Main menu backdrop and gameplay scene |
+
+A connector-based GLB generation attempt was made for a rigged character, but the current 3D generation service could not start a job in this workspace. To avoid blocking delivery or changing the game runtime, the implementation uses the generated 3D-style visual assets and native React Native depth/material treatments instead of introducing an unavailable GLB dependency. Mechanics, scoring, spawn logic, controls, persistence, and screen flow remain unchanged.

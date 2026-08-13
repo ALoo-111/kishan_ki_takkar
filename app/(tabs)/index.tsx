@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Animated,
+  Image,
+  ImageBackground,
   PanResponder,
   Platform,
   Pressable,
@@ -20,6 +22,8 @@ import { ScreenContainer } from "@/components/screen-container";
 const SAVE_KEY = "kishan-ki-takkar-save-v1";
 const MENU_AUDIO = require("../../assets/audio/menu-loop.mp3");
 const GAMEOVER_AUDIO = require("../../assets/audio/gameover-loop.mp3");
+const HERO_ART = "/manus-storage/kishan-hero-3d_f8df3b11.png";
+const VILLAGE_ART = "/manus-storage/holi-village-3d_6c35b0b2.png";
 const LANE_X = [-1, 0, 1];
 const GOLD = "#FFD93D";
 const NAVY = "#1A237E";
@@ -177,7 +181,7 @@ export default function HomeScreen() {
 
 function HoliBackdrop({ children, dim = false }: { children: ReactNode; dim?: boolean }) {
   return (
-    <View style={[styles.holiBackdrop, dim && styles.dimBackdrop]}>
+    <ImageBackground source={{ uri: VILLAGE_ART }} resizeMode="cover" style={[styles.holiBackdrop, dim && styles.dimBackdrop]}>
       <View style={[styles.colorBlob, styles.blobPink]} />
       <View style={[styles.colorBlob, styles.blobYellow]} />
       <View style={[styles.colorBlob, styles.blobGreen]} />
@@ -188,7 +192,7 @@ function HoliBackdrop({ children, dim = false }: { children: ReactNode; dim?: bo
         ))}
       </View>
       {children}
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -212,11 +216,8 @@ function MainMenu({ save, onPlay, onNavigate }: { save: SaveData; onPlay: () => 
         <BrandMark />
         <View style={styles.heroCharacter}>
           <View style={styles.heroShadow} />
-          <View style={styles.heroHead}><Text style={styles.heroMustache}>⌁</Text></View>
-          <View style={styles.heroTopi}><Text style={styles.heroTopiDot}>●</Text></View>
-          <View style={styles.heroBody}><Text style={styles.heroNamaste}>🙏</Text></View>
-          <View style={styles.heroFeet}><View style={styles.foot} /><View style={styles.foot} /></View>
-          <View style={styles.heroBadge}><Text style={styles.heroBadgeText}>KISHAN</Text></View>
+          <Image source={{ uri: HERO_ART }} resizeMode="contain" style={styles.heroArt} />
+          <View style={styles.heroBadge}><Text style={styles.heroBadgeText}>KISHAN • 3D HERO</Text></View>
         </View>
         <View style={styles.menuTagline}><Text style={styles.taglineText}>The village run starts now.</Text><Text style={styles.taglineSub}>Dodge drama. Gather the people.</Text></View>
         <View style={styles.menuStats}>
@@ -394,6 +395,7 @@ function GameScreen({ save, onExit, onRunComplete }: { save: SaveData; onExit: (
   return (
     <View style={styles.gameRoot} {...panResponder.panHandlers}>
       <StatusBar hidden />
+      <Image source={{ uri: VILLAGE_ART }} resizeMode="cover" style={styles.gameSkyImage} />
       <View style={styles.gameSky}><View style={styles.gameSun} /><View style={styles.gameCloudOne} /><View style={styles.gameCloudTwo} /></View>
       <View style={styles.villageRow}>
         {Array.from({ length: 8 }).map((_, index) => <View key={index} style={[styles.house, { left: index * (width / 6) - 18, backgroundColor: ["#F49E5A", "#D87664", "#F1C75B", "#D995D7"][index % 4] }]}><View style={styles.houseRoof} /><View style={styles.houseDoor} /></View>)}
@@ -437,7 +439,7 @@ function RunnerObject({ object, width, height }: { object: RunObject; width: num
 function PlayerAvatar({ lane, action, equipped, width, height }: { lane: number; action: Action; equipped: number; width: number; height: number }) {
   const skin = SKINS.find((item) => item.id === equipped) ?? SKINS[0];
   const laneX = width / 2 + LANE_X[lane] * (width * 0.22);
-  return <View style={[styles.playerAvatar, { left: laneX - 44, top: action === "jump" ? height * 0.58 : action === "slide" ? height * 0.68 : height * 0.63 }]}><View style={[styles.playerAura, { backgroundColor: skin.color }]} /><View style={[styles.playerTopi, { backgroundColor: skin.color }]} /><View style={styles.playerFace}><Text style={styles.playerEyes}>•  •</Text><Text style={styles.playerMoustache}>⌁</Text></View><View style={[styles.playerKurta, { backgroundColor: skin.color }]}><Text style={styles.playerHands}>{action === "jump" ? "↟" : action === "slide" ? "⌁" : "🙏"}</Text></View><View style={styles.playerLegs}><View style={styles.playerShoe} /><View style={styles.playerShoe} /></View><Text style={styles.playerName}>{skin.name}</Text></View>;
+  return <View style={[styles.playerAvatar, { left: laneX - 44, top: action === "jump" ? height * 0.58 : action === "slide" ? height * 0.68 : height * 0.63 }]}><View style={[styles.playerAura, { backgroundColor: skin.color }]} /><Image source={{ uri: HERO_ART }} resizeMode="contain" style={styles.playerArt} /><View style={[styles.playerTopi, { backgroundColor: skin.color }]} /><View style={styles.playerFace}><Text style={styles.playerEyes}>•  •</Text><Text style={styles.playerMoustache}>⌁</Text></View><View style={[styles.playerKurta, { backgroundColor: skin.color }]}><Text style={styles.playerHands}>{action === "jump" ? "↟" : action === "slide" ? "⌁" : "🙏"}</Text></View><View style={styles.playerLegs}><View style={styles.playerShoe} /><View style={styles.playerShoe} /></View><Text style={styles.playerName}>{skin.name}</Text></View>;
 }
 
 function GameOverOverlay({ followers, points, onRestart, onHome }: { followers: number; points: number; onRestart: () => void; onHome: () => void }) {
@@ -457,7 +459,7 @@ function SkinsScreen({ save, onBack, onSave }: { save: SaveData; onBack: () => v
     if (!isUnlocked && canBuy) { onSave({ points: save.points - (selectedSkin.pointCost ?? 0), unlocked: [...save.unlocked, selected] }); safeHaptic("success"); }
     else if (isUnlocked) { onSave({ equipped: selected }); safeHaptic("success"); }
   };
-  return <HoliBackdrop dim><ScrollView contentContainerStyle={styles.innerScroll} showsVerticalScrollIndicator={false}><ScreenHeader title="SKIN GARAGE" kicker="CHANGE YOUR LOOK" onBack={onBack} /><View style={styles.pointsBanner}><Text style={styles.pointsBannerIcon}>₹</Text><View><Text style={styles.pointsBannerLabel}>WALLET</Text><Text style={styles.pointsBannerValue}>{formatNumber(save.points)} points</Text></View><Text style={styles.pointsBannerHint}>Earn points by gathering followers</Text></View><View style={styles.skinPreviewCard}><View style={[styles.skinHalo, { backgroundColor: selectedSkin.color }]}><Text style={styles.skinPreviewIcon}>{selectedSkin.icon}</Text></View><Text style={styles.skinPreviewName}>{selectedSkin.name}</Text><Text style={styles.skinPreviewOutfit}>{selectedSkin.outfit}</Text><View style={styles.powerChip}><Text style={styles.powerChipLabel}>PASSIVE POWER</Text><Text style={styles.powerChipText}>{selectedSkin.power}</Text></View>{isUnlocked ? <Pressable onPress={equip} style={({ pressed }) => [styles.equipButton, save.equipped === selected && styles.equippedButton, pressed && styles.pressed]}><Text style={styles.equipText}>{save.equipped === selected ? "EQUIPPED ✓" : "EQUIP SKIN"}</Text></Pressable> : <Pressable onPress={equip} disabled={!canBuy} style={({ pressed }) => [styles.buyButton, !canBuy && styles.disabledButton, pressed && canBuy && styles.pressed]}><Text style={styles.equipText}>{canBuy ? `BUY FOR ₹${selectedSkin.pointCost}` : `LOCKED • ${selectedSkin.unlock}`}</Text></Pressable>}</View><Text style={styles.sectionCaption}>ALL 10 LOOKS</Text><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.skinRail}>{SKINS.map((skin) => { const unlocked = save.unlocked.includes(skin.id); return <Pressable key={skin.id} onPress={() => { safeHaptic(); setSelected(skin.id); }} style={({ pressed }) => [styles.skinTile, selected === skin.id && styles.skinTileActive, pressed && styles.pressed]}><View style={[styles.skinTileIcon, { backgroundColor: skin.color }]}><Text style={styles.skinTileIconText}>{unlocked ? skin.icon : "🔒"}</Text></View><Text style={styles.skinTileName}>{skin.name}</Text><Text style={styles.skinTileStatus}>{unlocked ? "UNLOCKED" : skin.unlock}</Text></Pressable>; })}</ScrollView></ScrollView></HoliBackdrop>;
+  return <HoliBackdrop dim><ScrollView contentContainerStyle={styles.innerScroll} showsVerticalScrollIndicator={false}><ScreenHeader title="SKIN GARAGE" kicker="CHANGE YOUR LOOK" onBack={onBack} /><View style={styles.pointsBanner}><Text style={styles.pointsBannerIcon}>₹</Text><View><Text style={styles.pointsBannerLabel}>WALLET</Text><Text style={styles.pointsBannerValue}>{formatNumber(save.points)} points</Text></View><Text style={styles.pointsBannerHint}>Earn points by gathering followers</Text></View><View style={styles.skinPreviewCard}><View style={[styles.skinHalo, { backgroundColor: selectedSkin.color }]}><Image source={{ uri: HERO_ART }} resizeMode="contain" style={styles.skinPreviewArt} /><Text style={styles.skinPreviewIcon}>{selectedSkin.icon}</Text></View><Text style={styles.skinPreviewName}>{selectedSkin.name}</Text><Text style={styles.skinPreviewOutfit}>{selectedSkin.outfit}</Text><View style={styles.powerChip}><Text style={styles.powerChipLabel}>PASSIVE POWER</Text><Text style={styles.powerChipText}>{selectedSkin.power}</Text></View>{isUnlocked ? <Pressable onPress={equip} style={({ pressed }) => [styles.equipButton, save.equipped === selected && styles.equippedButton, pressed && styles.pressed]}><Text style={styles.equipText}>{save.equipped === selected ? "EQUIPPED ✓" : "EQUIP SKIN"}</Text></Pressable> : <Pressable onPress={equip} disabled={!canBuy} style={({ pressed }) => [styles.buyButton, !canBuy && styles.disabledButton, pressed && canBuy && styles.pressed]}><Text style={styles.equipText}>{canBuy ? `BUY FOR ₹${selectedSkin.pointCost}` : `LOCKED • ${selectedSkin.unlock}`}</Text></Pressable>}</View><Text style={styles.sectionCaption}>ALL 10 LOOKS</Text><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.skinRail}>{SKINS.map((skin) => { const unlocked = save.unlocked.includes(skin.id); return <Pressable key={skin.id} onPress={() => { safeHaptic(); setSelected(skin.id); }} style={({ pressed }) => [styles.skinTile, selected === skin.id && styles.skinTileActive, pressed && styles.pressed]}><View style={[styles.skinTileIcon, { backgroundColor: skin.color }]}><Text style={styles.skinTileIconText}>{unlocked ? skin.icon : "🔒"}</Text></View><Text style={styles.skinTileName}>{skin.name}</Text><Text style={styles.skinTileStatus}>{unlocked ? "UNLOCKED" : skin.unlock}</Text></Pressable>; })}</ScrollView></ScrollView></HoliBackdrop>;
 }
 
 function LeaderboardScreen({ save, onBack }: { save: SaveData; onBack: () => void }) {
@@ -489,6 +491,7 @@ const styles = StyleSheet.create({
   loading: { flex: 1, backgroundColor: NAVY, alignItems: "center", justifyContent: "center" },
   loadingText: { color: "white", fontSize: 18, fontWeight: "800" },
   holiBackdrop: { flex: 1, backgroundColor: "#F88477", overflow: "hidden", position: "relative" },
+  villageArtwork: { ...StyleSheet.absoluteFillObject, opacity: 0.68 },
   dimBackdrop: { backgroundColor: "#B95A72" },
   colorBlob: { position: "absolute", borderRadius: 999, opacity: 0.78 },
   blobPink: { width: 260, height: 260, top: -80, left: -80, backgroundColor: PINK },
@@ -507,7 +510,8 @@ const styles = StyleSheet.create({
   brandTitle: { color: "#FFF4B0", fontSize: 23, lineHeight: 23, fontWeight: "900", letterSpacing: 1.1, textShadowColor: "rgba(26,35,126,0.6)", textShadowOffset: { width: 1, height: 2 }, textShadowRadius: 0 },
   brandTitleCompact: { fontSize: 18, lineHeight: 18 },
   brandTitleAccent: { color: "white" },
-  heroCharacter: { width: 156, height: 170, alignItems: "center", justifyContent: "flex-end", marginTop: 12, marginBottom: 10 },
+  heroCharacter: { width: 156, height: 190, alignItems: "center", justifyContent: "flex-end", marginTop: 12, marginBottom: 10 },
+  heroArt: { width: 146, height: 176, zIndex: 2 },
   heroShadow: { position: "absolute", bottom: 3, width: 130, height: 19, borderRadius: 80, backgroundColor: "rgba(26,35,126,0.22)" },
   heroHead: { position: "absolute", top: 26, width: 57, height: 57, borderRadius: 32, backgroundColor: "#B96A44", borderWidth: 3, borderColor: "#FFF2D6", alignItems: "center", justifyContent: "flex-end", paddingBottom: 5 },
   heroMustache: { color: NAVY, fontSize: 26, fontWeight: "900", transform: [{ rotate: "-4deg" }] },
@@ -528,7 +532,7 @@ const styles = StyleSheet.create({
   statLabel: { color: "rgba(255,255,255,0.65)", fontSize: 8, fontWeight: "900", letterSpacing: 1 },
   statValue: { color: "white", fontSize: 15, fontWeight: "900", marginTop: 1 },
   menuButtons: { alignSelf: "stretch", gap: 9 },
-  gameButton: { minHeight: 56, borderRadius: 18, borderWidth: 2, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", shadowColor: "#1A237E", shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  gameButton: { minHeight: 56, borderRadius: 18, borderWidth: 2, borderBottomWidth: 5, borderBottomColor: GOLD, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", shadowColor: "#1A237E", shadowOpacity: 0.3, shadowRadius: 11, shadowOffset: { width: 0, height: 7 }, elevation: 7 },
   gameButtonLarge: { minHeight: 66 },
   buttonRow: { flexDirection: "row", gap: 9 },
   buttonRowButton: { flex: 1 },
@@ -557,7 +561,8 @@ const styles = StyleSheet.create({
   pointsBannerValue: { color: "white", fontSize: 17, fontWeight: "900", marginTop: 2 },
   pointsBannerHint: { marginLeft: "auto", maxWidth: 115, textAlign: "right", color: "rgba(255,255,255,0.62)", fontSize: 10, fontWeight: "700", lineHeight: 14 },
   skinPreviewCard: { backgroundColor: "rgba(255,255,255,0.88)", borderRadius: 26, alignItems: "center", padding: 20, borderWidth: 1, borderColor: "rgba(255,255,255,0.8)", shadowColor: NAVY, shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 7 }, elevation: 4 },
-  skinHalo: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center", borderWidth: 7, borderColor: "rgba(26,35,126,0.1)", marginBottom: 9 },
+  skinHalo: { width: 110, height: 110, borderRadius: 55, alignItems: "center", justifyContent: "center", borderWidth: 7, borderColor: "rgba(26,35,126,0.1)", marginBottom: 9, overflow: "hidden" },
+  skinPreviewArt: { width: 102, height: 102, position: "absolute" },
   skinPreviewIcon: { color: NAVY, fontSize: 58, fontWeight: "900" },
   skinPreviewName: { color: NAVY, fontSize: 22, fontWeight: "900" },
   skinPreviewOutfit: { color: "#516078", fontSize: 11, fontWeight: "700", marginTop: 4, textAlign: "center" },
@@ -615,7 +620,8 @@ const styles = StyleSheet.create({
   helpText: { color: NAVY, fontSize: 12, fontWeight: "700", lineHeight: 18, marginTop: 7 },
   versionText: { textAlign: "center", color: "rgba(255,255,255,0.65)", fontSize: 10, fontWeight: "800", marginTop: 24 },
   gameRoot: { flex: 1, backgroundColor: "#8BD7EF", overflow: "hidden" },
-  gameSky: { ...StyleSheet.absoluteFillObject, backgroundColor: "#86D9F0" },
+  gameSky: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(134,217,240,0.34)" },
+  gameSkyImage: { ...StyleSheet.absoluteFillObject, opacity: 0.88 },
   gameSun: { position: "absolute", top: 44, right: 24, width: 64, height: 64, borderRadius: 36, backgroundColor: "#FFF4AB" },
   gameCloudOne: { position: "absolute", top: 72, left: 20, width: 86, height: 18, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.7)" },
   gameCloudTwo: { position: "absolute", top: 130, right: 80, width: 62, height: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.58)" },
@@ -635,13 +641,13 @@ const styles = StyleSheet.create({
   hudTopRow: { paddingTop: 18, paddingHorizontal: 14, flexDirection: "row", alignItems: "flex-start", gap: 8 },
   pauseButton: { width: 37, height: 37, borderRadius: 13, backgroundColor: "rgba(26,35,126,0.82)", alignItems: "center", justifyContent: "center" },
   pauseText: { color: "white", fontWeight: "900", fontSize: 16 },
-  hudMetric: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 11, backgroundColor: "rgba(26,35,126,0.75)", minWidth: 82 },
+  hudMetric: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 11, backgroundColor: "rgba(26,35,126,0.78)", minWidth: 82, borderWidth: 1, borderColor: "rgba(255,215,0,0.65)", shadowColor: GOLD, shadowOpacity: 0.22, shadowRadius: 7, shadowOffset: { width: 0, height: 2 }, elevation: 4 },
   hudMetricLabel: { color: "rgba(255,255,255,0.62)", fontSize: 7, fontWeight: "900", letterSpacing: 0.8 },
   hudMetricValue: { color: GOLD, fontSize: 15, fontWeight: "900", marginTop: 1 },
   meterWrap: { marginLeft: "auto", alignItems: "center", width: 31 },
   meterBolt: { color: GOLD, fontSize: 17, position: "absolute", top: -3, zIndex: 2 },
-  meterTrack: { marginTop: 17, height: 93, width: 13, borderRadius: 9, backgroundColor: "rgba(26,35,126,0.58)", borderWidth: 2, borderColor: "rgba(255,255,255,0.5)", overflow: "hidden", justifyContent: "flex-end" },
-  meterFill: { width: "100%", backgroundColor: ORANGE, borderRadius: 7 },
+  meterTrack: { marginTop: 17, height: 93, width: 13, borderRadius: 9, backgroundColor: "rgba(26,35,126,0.58)", borderWidth: 2, borderColor: "rgba(255,255,255,0.72)", overflow: "hidden", justifyContent: "flex-end", shadowColor: ORANGE, shadowOpacity: 0.7, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 7 },
+  meterFill: { width: "100%", backgroundColor: ORANGE, borderRadius: 7, borderTopWidth: 2, borderTopColor: "#FFD180" },
   meterLabel: { color: "white", fontSize: 7, fontWeight: "900", marginTop: 3 },
   distancePill: { position: "absolute", top: 116, left: 14, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.55)", paddingHorizontal: 9, paddingVertical: 5 },
   distanceText: { color: NAVY, fontSize: 14, fontWeight: "900" },
@@ -656,7 +662,8 @@ const styles = StyleSheet.create({
   objectGlow: { position: "absolute", width: 56, height: 56, borderRadius: 30 },
   objectEmoji: { fontSize: 30, fontWeight: "900", textShadowColor: "rgba(26,35,126,0.25)", textShadowOffset: { width: 1, height: 2 }, textShadowRadius: 2 },
   objectLabel: { color: "white", fontSize: 7, fontWeight: "900", backgroundColor: "rgba(26,35,126,0.75)", paddingHorizontal: 4, borderRadius: 4, marginTop: 2 },
-  playerAvatar: { position: "absolute", width: 88, height: 125, zIndex: 18, alignItems: "center" },
+  playerAvatar: { position: "absolute", width: 88, height: 140, zIndex: 18, alignItems: "center" },
+  playerArt: { position: "absolute", width: 88, height: 132, zIndex: 1 },
   playerAura: { position: "absolute", bottom: 6, width: 83, height: 24, borderRadius: 50, opacity: 0.35 },
   playerTopi: { position: "absolute", top: 1, width: 44, height: 16, borderRadius: 12, borderBottomWidth: 3, borderBottomColor: NAVY },
   playerFace: { position: "absolute", top: 11, width: 38, height: 38, borderRadius: 22, backgroundColor: "#B96A44", borderWidth: 2, borderColor: "#FFE6BA", alignItems: "center", justifyContent: "flex-end", paddingBottom: 3 },
@@ -686,7 +693,7 @@ const styles = StyleSheet.create({
   hangingBody: { fontSize: 44, marginTop: -5 },
   dancingEnemies: { width: "70%", alignItems: "center", paddingBottom: 15 },
   danceMarks: { color: GOLD, fontSize: 21, fontWeight: "900", marginTop: -3 },
-  gameOverCard: { width: "100%", borderRadius: 23, padding: 20, paddingTop: 28, backgroundColor: "#FFF8E5", alignItems: "center" },
+  gameOverCard: { shadowColor: NAVY, shadowOpacity: 0.34, shadowRadius: 18, shadowOffset: { width: 0, height: 10 }, elevation: 9, width: "100%", borderRadius: 23, padding: 20, paddingTop: 28, backgroundColor: "#FFF8E5", alignItems: "center" },
   gameOverTitle: { color: NAVY, fontSize: 29, fontWeight: "900", letterSpacing: 1 },
   gameOverSub: { color: "#69758B", fontSize: 11, fontWeight: "700", marginTop: 3 },
   gameOverStats: { flexDirection: "row", gap: 14, marginTop: 17, marginBottom: 18 },
